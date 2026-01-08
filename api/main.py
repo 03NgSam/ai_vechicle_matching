@@ -7,6 +7,13 @@ def get_demand_level(hour):
         return "high"
     return "normal"
 
+def get_ride_category(cost, eta):
+    if cost < 100:
+        return "cheap"
+    if eta < 30:
+        return "fast"
+    return "balanced"
+
 app = FastAPI(title="AI Vehicle Matching API")
 
 # Load trained model
@@ -19,16 +26,18 @@ def get_ride_quote(distance_km: float, hour: int):
     cost = distance_km * 10 * surge
 
     demand = get_demand_level(hour)
+    category = get_ride_category(cost, eta)
 
     if demand == "high":
-        recommendation = "Peak-hour pricing applied due to high demand"
+        recommendation = "High demand detected. Surge pricing applied."
     else:
-        recommendation = "Normal pricing due to balanced demand"
+        recommendation = "Normal demand. Standard pricing applied."
 
     return {
         "eta_minutes": round(eta, 2),
         "estimated_cost": round(cost, 2),
         "surge_multiplier": surge,
         "demand_level": demand,
+        "ride_category": category,
         "recommendation": recommendation
     }
